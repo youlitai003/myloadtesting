@@ -8,3 +8,6 @@ splitAllCSVs: False
 failureCriteria:
 - p90(response_time_ms) > 50
 - percentage(error) > 10
+autoStop:
+  errorPercentage: 80
+  timeWindow: 120
