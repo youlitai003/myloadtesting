@@ -7,22 +7,22 @@ permissions:
   contents: read  # This is required for actions/checkout
 
 env:
-  # For AZURE_WEBAPP_NAME enter just the name, not the full URL.
   RESOURCE_GROUP: az2006-rg
   LOAD_TEST_RESOURCE: az2006loadtest
   AZURE_WEBAPP_NAME: az2006app50770167 
 
 jobs:
-  # This workflow consists of a single job called "loadtest"
-
   loadtest:
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      #Login in your azure subscription using OpenID Connect (credentials stored as GitHub secrets in repo)
+      # Install missing dependencies
+      - name: Install dependencies
+        run: npm install @actions/core
+
+      # Login to your Azure subscription using OpenID Connect
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -32,10 +32,10 @@ jobs:
 
       # Run the load test
       - name: Azure Load Testing
-        uses: azure/load-testing@v2
+        uses: azure/load-testing@v1
         with:
           loadTestConfigFile: 'config.yaml'
-          loadTestResource: ${{ env.LOAD_TEST_RESOURCE}}
+          loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           env: |
             [
@@ -45,11 +45,9 @@ jobs:
               }
             ]
 
-      # upload the published website code artifacts
+      # Upload the published website code artifacts
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: loadTestResults
-          path: ${{github.workspace}}/loadTest
-
-          
+          path: ${{ github.workspace }}/loadTest
