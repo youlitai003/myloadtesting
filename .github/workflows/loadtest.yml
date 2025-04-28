@@ -30,20 +30,28 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Run the load test
-      - name: Azure Load Testing
-        uses: azure/load-testing@v1
-        with:
-          loadTestConfigFile: 'config.yaml'
-          loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          env: |
-            [
-              {
-              "name": "webapp",
-              "value": "${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
-              }
-            ]
+      - name: Azure Load Test via CLI
+        run: |
+          az load test create --resource-group $RESOURCE_GROUP --load-test-resource $LOAD_TEST_RESOURCE --test-config-file config.yaml
+        env:
+          AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME }}
+          RESOURCE_GROUP: ${{ env.RESOURCE_GROUP }}
+          LOAD_TEST_RESOURCE: ${{ env.LOAD_TEST_RESOURCE }}
+
+      # # Run the load test
+      # - name: Azure Load Testing
+      #   uses: azure/load-testing@v1
+      #   with:
+      #     loadTestConfigFile: 'config.yaml'
+      #     loadTestResource: ${{ env.LOAD_TEST_RESOURCE }}
+      #     resourceGroup: ${{ env.RESOURCE_GROUP }}
+      #     env: |
+      #       [
+      #         {
+      #         "name": "webapp",
+      #         "value": "${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+      #         }
+      #       ]
 
       # Upload the published website code artifacts
       - name: Upload artifact for deployment job
